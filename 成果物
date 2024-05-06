@@ -1,0 +1,54 @@
+#ファイル名をフォルダから取得
+import os
+import pandas as pd
+
+# 対象のフォルダパス
+folder_path = input('対象のフォルダパスを入力してください: ')
+
+# エクセルファイル名 ('新ファイル名リスト.xlsx'が既に存在する場合は、パスを含む完全なファイル名)
+excel_path = os.path.join(folder_path, '新ファイル名リスト.xlsx')
+
+# フォルダ内の全ファイルのリストを取得（ただし、'新ファイル名リスト.xlsx'自体は除外する）
+all_files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f)) and f != '新ファイル名リスト.xlsx']
+
+# 旧ファイル名のリストをデータフレームに変換
+df = pd.DataFrame(all_files, columns=['旧ファイル名'])
+
+# データフレームをエクセルに書き込み（既存のファイルがない場合は新しく作成）
+with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
+    df.to_excel(writer, index=False)
+
+print("旧ファイル名の書き込みが完了しました。")
+
+#ファイル名を変更する
+import os
+import pandas as pd
+
+# ユーザーにフォルダパスの入力を促す
+folder_path = input('対象のフォルダパスを入力してください: ')
+
+# エクセルファイル名
+excel_path = os.path.join(folder_path, '新ファイル名リスト.xlsx')
+
+# エクセルファイルを読み込む
+df = pd.read_excel(excel_path)
+
+# ファイル名のマッピング用辞書を作成する。キーは旧ファイル名、値は新ファイル名。
+name_mapping = pd.Series(df['新ファイル名'].values, index=df['旧ファイル名']).to_dict()
+
+# フォルダ内の全ファイルのリストを取得（ただし、'新ファイル名リスト.xlsx'自体は除外）
+all_files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
+
+# フォルダ内のファイル名を変更する
+for old_name, new_name in name_mapping.items():
+    old_file_path = os.path.join(folder_path, old_name)
+    # 名前変更の対象となる旧ファイルが存在する場合のみ処理を行う
+    if os.path.isfile(old_file_path):
+        new_file_path = os.path.join(folder_path, new_name)
+        os.rename(old_file_path, new_file_path)
+        print(f"{old_name} を {new_name} に変更しました。")
+    else:
+        print(f"{old_name} は見つかりませんでした。")
+
+print("全てのファイル名の変更が完了しました。")
+
