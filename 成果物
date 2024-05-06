@@ -1,4 +1,6 @@
 #ファイル名をフォルダから取得
+#変更したいファイルを任意のフォルダへ格納し、新ファイル名.xlsxも併せて格納しておく
+#このコードを実行するとフォルダ内のファイル名を取得しエクセルに書き込んでくれます。
 import os
 import pandas as pd
 
@@ -20,6 +22,8 @@ with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
 
 print("旧ファイル名の書き込みが完了しました。")
 
+
+#上記のコードを実行後、新ファイル名をエクセルＢ列へ記載し以下のコードを実行するとファイル名が変更できる
 #ファイル名を変更する
 import os
 import pandas as pd
@@ -52,3 +56,5 @@ for old_name, new_name in name_mapping.items():
 
 print("全てのファイル名の変更が完了しました。")
 
+
+#今後、.exeファイル化してPythonの環境がなくても対応ができるようにする予定
