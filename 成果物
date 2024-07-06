@@ -17,10 +17,12 @@ all_files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(f
 df = pd.DataFrame(all_files, columns=['旧ファイル名'])
 
 # データフレームをエクセルに書き込み（既存のファイルがない場合は新しく作成）
-with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
+with pd.ExcelWriter(excel_path, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
     df.to_excel(writer, index=False)
 
 print("旧ファイル名の書き込みが完了しました。")
+
+input('プログラムを終了するにはEnterキーを押してください...')
 
 
 #上記のコードを実行後、新ファイル名をエクセルＢ列へ記載し以下のコードを実行するとファイル名が変更できる
@@ -34,25 +36,29 @@ folder_path = input('対象のフォルダパスを入力してください: ')
 # エクセルファイル名
 excel_path = os.path.join(folder_path, '新ファイル名リスト.xlsx')
 
-# エクセルファイルを読み込む
-df = pd.read_excel(excel_path)
+# エクセルファイルを読み込む際に、すべてのデータを文字列として扱う
+df = pd.read_excel(excel_path, dtype=str)
 
-# ファイル名のマッピング用辞書を作成する。キーは旧ファイル名、値は新ファイル名。
-name_mapping = pd.Series(df['新ファイル名'].values, index=df['旧ファイル名']).to_dict()
+# ファイル名のマッピング用辞書を作成する。キーは旧ファイル名、値はC列。
+name_mapping = pd.Series(df['@があった場合'].values, index=df['旧ファイル名']).to_dict()
 
 # フォルダ内の全ファイルのリストを取得（ただし、'新ファイル名リスト.xlsx'自体は除外）
 all_files = [f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))]
 
 # フォルダ内のファイル名を変更する
 for old_name, new_name in name_mapping.items():
-    old_file_path = os.path.join(folder_path, old_name)
-    # 名前変更の対象となる旧ファイルが存在する場合のみ処理を行う
-    if os.path.isfile(old_file_path):
-        new_file_path = os.path.join(folder_path, new_name)
-        os.rename(old_file_path, new_file_path)
-        print(f"{old_name} を {new_name} に変更しました。")
+    # 新しいファイル名が空白または'0'でなく、ピリオドを含んでいることを確認
+    if new_name and new_name != '0' and '.' in new_name:
+        old_file_path = os.path.join(folder_path, old_name)
+        # 名前変更の対象となる旧ファイルが存在する場合のみ処理を行う
+        if os.path.isfile(old_file_path):
+            new_file_path = os.path.join(folder_path, new_name)
+            os.rename(old_file_path, new_file_path)
+            print(f"{old_name} を {new_name} に変更しました。")
+        else:
+            print(f"{old_name} は見つかりませんでした。")
     else:
-        print(f"{old_name} は見つかりませんでした。")
+        print(f"{old_name} の新ファイル名が適切ではありません。")
 
 print("全てのファイル名の変更が完了しました。")
 
